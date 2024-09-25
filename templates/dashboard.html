@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .audio-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .audio-controls audio {
+            margin-right: 10px;
+        }
+
+        .download-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background-color: #2ecc71;
+        }
+
+        #audio-list {
+            margin-top: 1rem;
+        }
+
+        #audio-list li {
+            background-color: #fff;
+        }
+
+        #audio-list audio {
+            max-width: 100%;
+        }
+
+        #recordButton {
+            background-color: #e74c3c;
+        }
+
+        #recordButton:hover {
+            background-color: #c0392b;
+        }
+
+        #recordButton.recording {
+            background-color: #2ecc71;
+        }
+
+        #recordButton.recording:hover {
+            background-color: #27ae60;
+        }
+
+        #transcriptionResult, #translationResult {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #translateButton {
+            background-color: #3498db;
+        }
+
+        #translateButton:hover {
+            background-color: #2980b9;
+        }
+
+        #translateButton.translating {
+            background-color: #e67e22;
+        }
+
+        #translateButton.translating:hover {
+            background-color: #d35400;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/logout">Logout</a>
+    </nav>
+    <div class="container">
+        <h1>Welcome, {{ session['username'] }}!</h1>
+
+        <h2>Dictate and Translate:</h2>
+        <form id="translateForm">
+            <select id="translateLanguageSelect" required>
+                <option value="">Select Target Language</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese (Simplified)</option>
+            </select>
+            <button type="button" id="translateButton" class="btn">Dictate and Translate</button>
+        </form>
+        <div id="translationResult"></div>
+
+        <h2>Speech-to-Text Conversion:</h2>
+        <form id="speechToTextForm">
+            <select id="languageSelect" required>
+                <option value="">Select Language</option>
+                <option value="en-US">English (US)</option>
+                <option value="es-ES">Spanish (Spain)</option>
+                <option value="fr-FR">French (France)</option>
+                <option value="de-DE">German (Germany)</option>
+                <option value="it-IT">Italian (Italy)</option>
+                <option value="pt-BR">Portuguese (Brazil)</option>
+                <option value="ru-RU">Russian (Russia)</option>
+                <option value="ja-JP">Japanese (Japan)</option>
+                <option value="ko-KR">Korean (South Korea)</option>
+                <option value="zh-CN">Chinese (Simplified, China)</option>
+            </select>
+            <button type="button" id="recordButton" class="btn">Start Recording</button>
+        </form>
+        <div id="transcriptionResult"></div>
+        
+        <h2>Your Transcripts:</h2>
+        <ul>
+            {% for transcript in transcripts %}
+                <li>{{ transcript['transcript'] }} ({{ transcript['language'] }}, {{ transcript['source'] }})</li>
+            {% else %}
+                <p>No transcripts yet.</p>
+            {% endfor %}
+        </ul>
+        
+        <h2>Add a new Transcript:</h2>
+        <form action="/save_transcript" method="POST">
+            <textarea name="transcript" id="transcript" rows="4" required></textarea>
+            <button type="submit" class="btn">Save Transcript</button>
+        </form>
+
+        <h2>Generate Text-to-Speech Audio:</h2>
+        <form action="/generate_audio" method="POST">
+            <textarea name="text" id="text" rows="4" required></textarea>
+            <button type="submit" class="btn">Generate Audio</button>
+        </form>
+
+        <h2>Your Audio Files:</h2>
+        <ul id="audio-list">
+            {% for audio in audios %}
+                <li class="audio-item">
+                    <span>{{ audio['file_path'] }}</span>
+                    <div class="audio-controls">
+                        <audio controls>
+                            <source src="{{ url_for('serve_audio', filename=audio['file_path']) }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <a href="{{ url_for('download_audio', filename=audio['file_path']) }}" class="download-btn" download>Download</a>
+                    </div>
+                </li>
+            {% else %}
+                <p>No audio files yet.</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('audio-list').addEventListener('click', function(e) {
+            if (e.target.classList.contains('download-btn')) {
+                e.preventDefault();
+                var audioUrl = e.target.href;
+                var fileName = audioUrl.split('/').pop();
+                
+                fetch(audioUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(() => alert('An error occurred downloading the file.'));
+            }
+        });
+
+        // Speech-to-text functionality
+        const recordButton = document.getElementById('recordButton');
+        const languageSelect = document.getElementById('languageSelect');
+        const transcriptionResult = document.getElementById('transcriptionResult');
+
+        let recognition = null;
+
+        recordButton.addEventListener('click', () => {
+            if (recognition && recognition.recording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+
+        function startRecording() {
+            const selectedLanguage = languageSelect.value;
+            if (!selectedLanguage) {
+                alert('Please select a language');
+                return;
+            }
+
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = selectedLanguage;
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                transcriptionResult.textContent = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                stopRecording();
+            };
+
+            recognition.start();
+            recognition.recording = true;
+            recordButton.textContent = 'Stop Recording';
+            recordButton.classList.add('recording');
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+                recognition.recording = false;
+                recordButton.textContent = 'Start Recording';
+                recordButton.classList.remove('recording');
+                
+                // Save the transcript
+                const transcript = transcriptionResult.textContent;
+                const language = languageSelect.value;
+                if (transcript.trim() !== '') {
+                    saveSpeechTranscript(transcript, language);
+                }
+            }
+        }
+
+        function saveSpeechTranscript(transcript, language) {
+            fetch('/save_speech_transcript', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({transcript: transcript, language: language}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Speech transcript saved successfully!');
+                    location.reload();  // Reload the page to show the new transcript
+                } else {
+                    alert('Error saving speech transcript: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the speech transcript.');
+            });
+        }
+
+        // Dictate and Translate functionality
+        const translateButton = document.getElementById('translateButton');
+        const translateLanguageSelect = document.getElementById('translateLanguageSelect');
+        const translationResult = document.getElementById('translationResult');
+
+        let translateRecognition = null;
+
+        translateButton.addEventListener('click', () => {
+            if (translateRecognition && translateRecognition.translating) {
+                stopTranslating();
+            } else {
+                startTranslating();
+            }
+        });
+
+        function startTranslating() {
+            const targetLanguage = translateLanguageSelect.value;
+            if (!targetLanguage) {
+                alert('Please select a target language');
+                return;
+            }
+
+            translateRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            translateRecognition.continuous = true;
+            translateRecognition.interimResults = true;
+
+            translateRecognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                
+                // Send the transcript for translation
+                translateText(transcript, targetLanguage);
+            };
+
+            translateRecognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+                stopTranslating();
+            };
+
+            translateRecognition.onend = () => {
+                stopTranslating();
+            };
+
+            translateRecognition.start();
+            translateRecognition.translating = true;
+            translateButton.textContent = 'Stop Translating';
+            translateButton.classList.add('translating');
+        }
+
+        function stopTranslating() {
+            if (translateRecognition) {
+                translateRecognition.stop();
+                translateRecognition.translating = false;
+                translateButton.textContent = 'Dictate and Translate';
+                translateButton.classList.remove('translating');
+            }
+        }
+
+        function translateText(text, targetLanguage) {
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({text: text, target_language: targetLanguage}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    translationResult.textContent = data.translated_text;
+                } else {
+                    alert('Error translating text: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while translating the text.');
+            });
+        }
+    </script>
+</body>
+</html>
